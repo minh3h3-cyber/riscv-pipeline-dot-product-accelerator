@@ -1,0 +1,35 @@
+Time resolution is 1 ps
+
+====================================
+LOAD VECTOR DATA
+====================================
+A = [1 2 3 4]
+B = [5 6 7 8]
+
+WRITE BASE A
+base_a_reg = 00000064
+
+WRITE BASE B
+base_b_reg = 00000074
+
+START ACCELERATOR
+
+====================================
+ACCELERATOR INTERNAL STATE
+====================================
+base_a_reg  = 00000064
+base_b_reg  = 00000074
+start_reg   = 0
+accel_done  = 1
+accel_result=                   70
+
+DONE REGISTER =          1
+RESULT LOW REGISTER =         70
+
+====================================
+FINAL RESULT
+====================================
+PASS
+Result =         70
+====================================
+$finish called at time : 160 ns : File "project_1.srcs/sim_1/new/dot_accelerator_tb.v" Line 212
