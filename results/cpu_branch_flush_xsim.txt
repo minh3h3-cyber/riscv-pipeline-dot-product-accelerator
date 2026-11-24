@@ -1,0 +1,31 @@
+#-----------------------------------------------------------
+# xsim v2025.1 (64-bit)
+# SW Build 6140274 on Thu May 22 00:12:29 MDT 2025
+# IP Build 6138677 on Thu May 22 03:10:11 MDT 2025
+# SharedData Build 6139179 on Tue May 20 17:58:58 MDT 2025
+# Start of session at: Tue Nov 24 14:40:28 2026
+# Process ID         : 5952
+# Current directory  : C:/Users/NGUYEN~1/AppData/Local/Temp/TCL24742.TMP-branch-flush
+# Command line       : xsim.exe -log branch_flush_xsim.log -mode tcl -source {xsim.dir/branch_flush_snapshot/xsim_script.tcl}
+# Log file           : C:/Users/NGUYEN~1/AppData/Local/Temp/TCL24742.TMP-branch-flush/branch_flush_xsim.log
+# Journal file       : C:/Users/NGUYEN~1/AppData/Local/Temp/TCL24742.TMP-branch-flush\xsim.jou
+# Running On         : MSI
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : 11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz
+# CPU Frequency      : 2304 MHz
+# CPU Physical cores : 8
+# CPU Logical cores  : 16
+# Host memory        : 16866 MB
+# Swap memory        : 3087 MB
+# Total Virtual      : 19953 MB
+# Available Virtual  : 3639 MB
+#-----------------------------------------------------------
+source xsim.dir/branch_flush_snapshot/xsim_script.tcl
+# xsim {branch_flush_snapshot} -autoloadwcfg -runall
+Time resolution is 1 ps
+run -all
+PASS cpu_branch_flush_tb
+$finish called at time : 620 ns : File "C:/CongMinh/github/riscv-pipeline-dot-product-accelerator/tb/cpu_branch_flush_tb.sv" Line 83
+exit
+INFO: [Common 17-206] Exiting xsim at Tue Nov 24 14:40:30 2026...

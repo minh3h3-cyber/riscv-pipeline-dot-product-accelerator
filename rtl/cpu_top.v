@@ -1,8 +1,8 @@
 module cpu_top(
 
     input clk,
-    input reset
-    
+    input reset,
+
     output [31:0] debug_out
 );
 
@@ -16,7 +16,12 @@ wire [31:0] pc_plus4;
 
 wire [31:0] instr;
 
+wire flush;
+wire load_use_stall;
 wire stall;
+
+// A redirect from MEM takes priority over a younger load-use dependency.
+assign stall = load_use_stall && !flush;
 
 assign pc_plus4 = pc_current + 4;
 
@@ -264,7 +269,11 @@ alucontrol ALUCTRL(
     .ALUCtrl(alu_ctrl)
 );
 
-wire [31:0] alu_b;
+wire [1:0] forwardA;
+wire [1:0] forwardB;
+wire [31:0] mem_alu_result;
+wire [4:0] mem_rd;
+wire mem_RegWrite;
 
 wire [31:0] alu_srcA;
 wire [31:0] alu_srcB;
@@ -315,8 +324,6 @@ alu ALU(
     .zero(zero)
 );
 
-wire [1:0] forwardA;
-wire [1:0] forwardB;
 
 forwarding_unit FORWARD(
 
@@ -391,7 +398,6 @@ wire [31:0] mem_pc_plus4;
 // EX/MEM PIPELINE REGISTER
 //////////////////////////////////////////////////
 
-wire mem_RegWrite;
 wire mem_MemRead;
 wire mem_MemWrite;
 wire mem_MemtoReg;
@@ -400,15 +406,14 @@ wire mem_Branch;
 wire mem_BranchTaken;
 
 wire [31:0] mem_branch_target;
-wire [31:0] mem_alu_result;
 wire [31:0] mem_write_data;
 
-wire [4:0] mem_rd;
 
 ex_mem EX_MEM(
 
     .clk(clk),
     .reset(reset),
+    .flush(flush),
 
     // control
     .RegWrite_in(ex_RegWrite),
@@ -521,12 +526,8 @@ assign wb_data =
 // NEXT PC LOGIC
 //////////////////////////////////////////////////
 
-assign pc_next =
-    (mem_Jump) ?
-        mem_branch_target :
-    (mem_BranchTaken) ?
-        mem_branch_target :
-        pc_plus4;
+assign flush = mem_Jump || mem_BranchTaken;
+assign pc_next = flush ? mem_branch_target : pc_plus4;
 
 //////////////////////////////////////////////////
 //Hazard detection
@@ -536,7 +537,7 @@ hazard_detection_unit HAZARD(
     .rd_ex(ex_rd),
     .rs1_id(rs1),
     .rs2_id(rs2),
-    .stall(stall)
+    .stall(load_use_stall)
 );
 
 

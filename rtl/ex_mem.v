@@ -2,6 +2,7 @@ module ex_mem(
 
     input clk,
     input reset,
+    input flush,
 
     // CONTROL
     input RegWrite_in,
@@ -71,6 +72,18 @@ always @(posedge clk or posedge reset) begin
 
         rd_out <= 0;
 
+    end
+    else if(flush) begin
+        // The instruction currently in EX is younger than the redirect in MEM.
+        // Its data can stay in place once all side-effect enables are clear.
+        RegWrite_out    <= 0;
+        MemRead_out     <= 0;
+        MemWrite_out    <= 0;
+        MemtoReg_out    <= 0;
+        Branch_out      <= 0;
+        BranchTaken_out <= 0;
+        Jump_out        <= 0;
+        Jalr_out        <= 0;
     end
     else begin
 

@@ -1,4 +1,4 @@
-# Reproduce the MMIO dot-product test
+# Run the RTL simulations
 
 The archived Vivado 2025.1 simulation exercises data memory and the accelerator through its memory-mapped registers. The bench drives the memory interface directly. The CPU does not issue instructions during this test.
 
@@ -23,7 +23,7 @@ Both the original bench and the data memory initialize words 25–32 at time zer
 
 ## CPU test sources
 
-All 16 RTL files and the following four testbench sources preserve the contents of the uploaded project. Testbench filenames have been aligned with their purpose. Choose one top and add only its testbench.
+The following four testbenches retain the source text from the original Vivado project. Their filenames have been aligned with their purpose. Choose one top and add only its testbench.
 
 | Source in the original sim_1/new folder | Repository file | Module and purpose |
 | --- | --- | --- |
@@ -34,4 +34,23 @@ All 16 RTL files and the following four testbench sources preserve the contents 
 
 The current instruction ROM is initialized directly in `rtl/insmem.v`. Its loop counts the values below 20 in the initial data array. All eight entries qualify. The two historical benches expect different ROM contents, and each declares the same module name. Matching instruction images for these historical programs were not found as separate source files in the archive.
 
-The archived CPU top needs a comma after the reset port declaration in `rtl/cpu_top.v`. Its `flush` input connections on IF/ID and ID/EX have no driving assignment in that top. These issues require attention before validating the CPU from this snapshot. A CPU run needs fresh results before publishing pipeline verification claims. The archived synthesis report lists zero LUTs, registers, and DSPs for cpu_top, so it provides no usable area figure for the processor.
+## Run the CPU branch and jump regression
+
+Use the complete repository on disk. Run this line in the Vivado Tcl Console, substituting your repository path. The script builds only the CPU regression in a new temporary directory. It prints the path to the transcript.
+
+```tcl
+source {C:/CongMinh/github/riscv-pipeline-dot-product-accelerator/sim/run_branch_flush.tcl}
+```
+
+The CPU redirect is registered in MEM. It overrides a younger load-use stall and squashes the younger instructions in IF, ID, and EX, while the redirecting instruction can proceed to writeback. The directed program temporarily replaces the simulated ROM during reset and checks the following cases.
+
+| Case | Observation checked by the bench |
+| --- | --- |
+| Taken BEQ | The wrong-path store leaves memory word 0 at 0xCAFEF00D. Registers x5 and x6 stay zero, and the target increments x10 once. |
+| Untaken BNE | The fall-through instruction sets x11 to 11 and the next store writes 11 to byte address 8. |
+| Taken BEQ with a younger load-use dependency | The hazard and redirect coincide. The wrong-path load and its consumer have no architectural effect, and the target increments x12 once. |
+| JAL | x13 receives the link address 64. The target reads the link and writes 65 into x16. |
+
+The success marker is `PASS cpu_branch_flush_tb`. Save the transcript from a completed run when reporting results. For the separate threshold-counting CPU example, select `cputb` from `tb/cputb.v` and use the built-in ROM without the branch testbench.
+
+The archived synthesis report lists zero LUTs, registers, and DSPs for cpu_top, so it provides no usable area figure for the processor.
