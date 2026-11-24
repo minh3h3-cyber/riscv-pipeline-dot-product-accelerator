@@ -34,4 +34,13 @@ The archived Vivado XSim testbench drives the data-memory interface directly. It
 
 ## CPU verification status
 
-The CPU testbench in [tb/cputb.v](tb/cputb.v) expects register x10 to hold 8 after running the threshold-counting program. Reproducing this test from the current snapshot requires correcting the reset port declaration in the CPU top. The pipeline flush signal also needs a driver and a directed test that checks whether a taken branch discards wrong-path instructions.
+A directed regression passed in Vivado XSim 2025.1 with 16 checks covering:
+
+- Taken BEQ and suppression of wrong-path register writes and stores.
+- Untaken BNE and execution of fall-through instructions.
+- A taken branch coinciding with a younger load-use dependency.
+- JAL target execution and the saved return address.
+
+Simulation completed at 620 ns with `PASS cpu_branch_flush_tb`.
+
+[Testbench](tb/cpu_branch_flush_tb.sv) · [XSim transcript](results/cpu_branch_flush_xsim.txt) · [Simulation instructions](sim/README.md)
